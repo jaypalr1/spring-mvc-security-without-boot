@@ -1,0 +1,35 @@
+<b:beans xmlns="http://www.springframework.org/schema/security"
+  xmlns:b="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd">
+
+  <http auto-config="true">
+    <intercept-url pattern="/**" access="authenticated"/>
+
+    <!--    <intercept-url pattern="/secure/extreme/**" access="hasRole('ROLE_SUPERVISOR')"/>-->
+    <!--    <intercept-url pattern="/secure/**" access="hasRole('ROLE_USER')"/>-->
+    <!--    <intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>-->
+
+    <!--    <jee mappable-roles="ROLE_USER,ROLE_SUPERVISOR"/>-->
+
+
+    <!-- Logout -->
+    <logout delete-cookies="JSESSIONID"/>
+
+
+    <!-- Session Management -->
+    <session-management invalid-session-url="/invalidSession.htm">
+
+      <!--  Setting true will enable only logged-in user to stay logged in. 2nd login attempt will not be allowed.
+            If we do not set it to 'true' then 2nd login would invalidate  1st logged-in user. -->
+      <concurrency-control max-sessions="1" error-if-maximum-exceeded="true"/>
+    </session-management>
+
+  </http>
+
+  <user-service>
+    <user name="user" password="{noop}password" authorities="ROLE_USER"/>
+  </user-service>
+
+</b:beans>
