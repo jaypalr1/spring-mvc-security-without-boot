@@ -1,8 +1,11 @@
 package com.jay.controller;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -47,7 +50,13 @@ public class HomeController {
 
   @PostMapping("/authenticate")
   public ModelAndView authenticate(@RequestParam String username, @RequestParam String password) {
-    if ("u".equals(username) || "p".equals(password)) {
+    if ("u".equals(username) && "p".equals(password)) {
+      Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
+      authentication.setAuthenticated(true);
+
+      SecurityContext context = SecurityContextHolder.createEmptyContext();
+      context.setAuthentication(authentication);
+
       return new ModelAndView("success");
     } else {
       return new ModelAndView("failure");
