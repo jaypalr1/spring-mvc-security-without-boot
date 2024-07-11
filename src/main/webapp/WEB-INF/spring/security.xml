@@ -1,25 +1,63 @@
 <b:beans xmlns="http://www.springframework.org/schema/security"
   xmlns:b="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-						http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd">
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+  https://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/security
+	https://www.springframework.org/schema/security/spring-security.xsd">
+
+
+  <!--  <b:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/> -->
+
+
+  <authentication-manager>
+    <authentication-provider>
+      <user-service>
+        <user name="u" password="{noop}p" authorities="ROLE_USER"/>
+        <!--  <user name="user" password="pass" authorities="ROLE_USER"/> -->
+      </user-service>
+      <!--  <password-encoder ref="encoder"/> -->
+    </authentication-provider>
+  </authentication-manager>
+
+
+  <!--  Handler Mapping config -->
+  <b:bean id="mvcHandlerMappingIntrospector"
+    class="org.springframework.web.servlet.handler.HandlerMappingIntrospector"/>
+
 
   <http auto-config="true">
+    <intercept-url pattern="/login" access="permitAll"/>
+    <intercept-url pattern="/authenticate" access="permitAll"/>
+    <intercept-url pattern="/static/**" access="permitAll"/>
     <intercept-url pattern="/**" access="authenticated"/>
+<!--    <intercept-url pattern="/**" access="hasRole('USER')"/>-->
 
-    <!--    <intercept-url pattern="/secure/extreme/**" access="hasRole('ROLE_SUPERVISOR')"/>-->
-    <!--    <intercept-url pattern="/secure/**" access="hasRole('ROLE_USER')"/>-->
-    <!--    <intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>-->
+    <!--
+    loginProcessingUrl() – the URL to submit the username and password to.
+    defaultSuccessUrl() – the landing page after a successful login.
+    failureUrl() – the landing page after an unsuccessful login
+    -->
+    <form-login
+      login-page="/login"
+      login-processing-url="/authenticate"
+      default-target-url="/home"
+      authentication-failure-url="/login?error=true"
+      username-parameter="username"
+      password-parameter="password"
+    />
 
-    <!--    <jee mappable-roles="ROLE_USER,ROLE_SUPERVISOR"/>-->
 
-
-    <!-- Logout -->
-    <logout delete-cookies="JSESSIONID"/>
+    <logout
+      logout-url="/logout"
+      logout-success-url="/login?logout=true"
+      invalidate-session="true"
+      delete-cookies="JSESSIONID"
+    />
 
 
     <!-- Session Management -->
-    <session-management invalid-session-url="/invalidSession.htm">
+    <session-management invalid-session-url="/invalidSession.html">
 
       <!--  Setting true will enable only logged-in user to stay logged in. 2nd login attempt will not be allowed.
             If we do not set it to 'true' then 2nd login would invalidate  1st logged-in user. -->
@@ -28,8 +66,5 @@
 
   </http>
 
-  <user-service>
-    <user name="user" password="{noop}password" authorities="ROLE_USER"/>
-  </user-service>
 
 </b:beans>
