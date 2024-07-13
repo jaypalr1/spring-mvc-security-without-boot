@@ -13,5 +13,7 @@
 
 <h1>${message}</h1>
 
+User login here: <a href="login.jsp">Login</a>
+
 </body>
 </html>

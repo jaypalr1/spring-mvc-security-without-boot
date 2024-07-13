@@ -7,57 +7,84 @@
 	https://www.springframework.org/schema/security/spring-security.xsd">
 
 
-  <!--  <b:bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/> -->
+  <b:bean id="passwordEncoder"
+    class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+  <!--    class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>-->
 
 
-  <authentication-manager>
-    <authentication-provider>
-      <user-service>
-        <user name="u" password="{noop}p" authorities="ROLE_USER"/>
-        <!--  <user name="user" password="pass" authorities="ROLE_USER"/> -->
-      </user-service>
-      <!--  <password-encoder ref="encoder"/> -->
-    </authentication-provider>
-  </authentication-manager>
+  <!--  In-memory authentication-->
+  <!--  <authentication-manager>-->
+  <!--    <authentication-provider>-->
+  <!--      <user-service>-->
+  <!--        <user name="u" password="{noop}p" authorities="ROLE_USER"/>-->
+  <!--        &lt;!&ndash;        <user name="u" password="p" authorities="ROLE_USER"/>&ndash;&gt;-->
+  <!--      </user-service>-->
+  <!--      &lt;!&ndash;      <password-encoder ref="passwordEncoder"/>&ndash;&gt;-->
+  <!--    </authentication-provider>-->
+  <!--  </authentication-manager>-->
 
 
-  <!--  Handler Mapping config -->
+  <b:bean id="customUserDetailsService" class="com.jay.config.CustomUserDetailsService"/>
+  <b:bean id="authenticationManager"
+    class="org.springframework.security.authentication.ProviderManager">
+    <b:constructor-arg>
+      <b:bean class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <b:property name="userDetailsService" ref="customUserDetailsService"/>
+        <b:property name="passwordEncoder" ref="passwordEncoder"/>
+      </b:bean>
+    </b:constructor-arg>
+  </b:bean>
+
+
+  <!--  Handler Mapping com.jay.config -->
   <b:bean id="mvcHandlerMappingIntrospector"
     class="org.springframework.web.servlet.handler.HandlerMappingIntrospector"/>
 
 
   <http auto-config="true">
-    <intercept-url pattern="/login" access="permitAll"/>
-    <intercept-url pattern="/authenticate" access="permitAll"/>
+
+    <!--  We need to send '_crsf' token which is generated randomly base on the user's session.
+      Without this token our app won't allow access to any authenticated endpoints. Thus disabled it.
+    -->
+    <csrf disabled="true"/>
+
+
+    <!--    Configure public and authenticated endpoints-->
+    <intercept-url pattern="/" access="permitAll()"/>
+    <intercept-url pattern="/home" access="permitAll()"/>
+    <intercept-url pattern="/index" access="permitAll()"/>
+    <intercept-url pattern="/login/**" access="permitAll()"/>
     <intercept-url pattern="/static/**" access="permitAll"/>
-    <intercept-url pattern="/**" access="authenticated"/>
-<!--    <intercept-url pattern="/**" access="hasRole('USER')"/>-->
+    <intercept-url pattern="/**" access="isAuthenticated()"/>
+    <!--    <intercept-url pattern="/**" access="hasRole('USER')"/>-->
+
 
     <!--
-    loginProcessingUrl() – the URL to submit the username and password to.
-    defaultSuccessUrl() – the landing page after a successful login.
-    failureUrl() – the landing page after an unsuccessful login
+    login-page - JSP page for using login page
+    loginProcessingUrl – the URL to submit the username and password to.
+    default-target-url - the landing page after a successful login.
+    defaultSuccessUrl – the landing page after a successful login.
+    failureUrl – the landing page after an unsuccessful login.
+
+    NOTE: If we do not specify the 'login-page' then spring security's default page will be used.
     -->
     <form-login
       login-page="/login"
-      login-processing-url="/authenticate"
-      default-target-url="/home"
-      authentication-failure-url="/login?error=true"
-      username-parameter="username"
-      password-parameter="password"
+      default-target-url="/login/success"
     />
 
 
+    <!--    <http-basic/>-->
+
     <logout
       logout-url="/logout"
-      logout-success-url="/login?logout=true"
       invalidate-session="true"
       delete-cookies="JSESSIONID"
     />
 
 
     <!-- Session Management -->
-    <session-management invalid-session-url="/invalidSession.html">
+    <session-management invalid-session-url="/invalid-session">
 
       <!--  Setting true will enable only logged-in user to stay logged in. 2nd login attempt will not be allowed.
             If we do not set it to 'true' then 2nd login would invalidate  1st logged-in user. -->
