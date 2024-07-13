@@ -17,7 +17,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @Controller
-//@RequiredArgsConstructor
 public class HomeController {
 
   @Autowired
